@@ -4,18 +4,18 @@ class Oystercard
 
 	attr_accessor :balance, :in_use
 	
-	def initialize
-		@balance = 0
-		@in_use = false
+	def initialize(balance = 0, in_use = false)
+		@balance = balance
+		@in_use = in_use
 	end 
 	
 	def top_up(amount)
-		fail "Total balance cannot exceed £#{CARD_LIMIT}" unless self.balance + amount <= CARD_LIMIT 
-		self.balance  = self.balance + amount
+		fail "Can't top up above £#{CARD_LIMIT}" unless @balance + amount <= CARD_LIMIT 
+		@balance  += amount
 	end
 
 	def deduct(amount)
-		self.balance = self.balance - amount
+		@balance -= amount
 	end 
 
 	def touch_in
