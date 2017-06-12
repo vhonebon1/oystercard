@@ -18,4 +18,12 @@ describe Oystercard do
 			expect{card.top_up(1)}.to raise_error("Total balance cannot exceed £90")
 		end
 	end 
+	describe "#deduct" do 
+		it "deducts some amount from the card balance" do
+			card = Oystercard.new
+			random_amount = rand(1..90)
+			card.top_up(random_amount)
+			expect(card.deduct(random_amount)).to eq 0 
+		end 
+	end 
 end
