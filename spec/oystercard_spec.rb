@@ -31,4 +31,12 @@ describe Oystercard do
 			expect(card.touch_in).to eq(true)
 		end
 	end
+	describe "#in_journey?" do
+		it "tells whether a card is in use" do
+			#allow(card).to receive_message_chain(:top_up,:touch_in)
+			card.touch_in
+			expect(card.in_journey?).to eq true
+		end 
+	end 
+		
 end
