@@ -2,6 +2,11 @@ require './lib/oystercard.rb'
 describe Oystercard do
 
 	let(:card) {described_class.new}
+	let(:station) { double("Station") }
+
+	before do
+		allow(station).to receive(:name)
+	end
 
 	it "expects the card to have a balance of 0 when initialized" do
 		expect(card.balance).to eq(0)
@@ -31,20 +36,31 @@ describe Oystercard do
 		context "Where there is greater than £1 credit on card" do
 		it "changes card status to in use when touched in" do
 			card.top_up(10)
-			expect(card.touch_in).to eq(true)
+			expect(card.touch_in(station)).to eq(true)
 		end
 	end
 		context "when card has less than £1 credit" do
 			it "raises an error" do
-			expect{card.touch_in}.to raise_error("Not enough credit - please top up.")
+				card.deduct(10)
+			expect{card.touch_in(station)}.to raise_error("Not enough credit - please top up.")
 		end
 	end
+
+		before do
+			card.top_up(10)
+		end
+
+	  it "passes a message \'name\' to a station object" do
+			expect(station).to receive(:name)
+			card.touch_in(station)
+		end
+
 end
 
 	describe "#in_journey?" do
 		it "tells whether a card is in use" do
 			card.top_up(10)
-			card.touch_in
+			card.touch_in(station)
 			expect(card.in_journey?).to eq(true)
 		end
 	end
@@ -52,7 +68,7 @@ end
 	describe "#touch_out" do
 		before do
 			card.top_up(10)
-			card.touch_in
+			card.touch_in(station)
 		end
 		it "changes card status to not in use" do
 			fare_journey = 5

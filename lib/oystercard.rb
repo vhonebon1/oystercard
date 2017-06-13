@@ -18,8 +18,9 @@ class Oystercard
 		@balance -= amount
 	end
 
-	def touch_in
+	def touch_in(station)
 		fail "Not enough credit - please top up." unless @balance > 1
+		station.name
 		@in_use = true
 	end
 
