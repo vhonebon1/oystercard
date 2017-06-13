@@ -27,7 +27,8 @@ class Oystercard
 		in_use
 	end
 
-	def touch_out
+	def touch_out(fare_journey)
 		@in_use = false
+		deduct(fare_journey)
 	end
 end

@@ -55,10 +55,12 @@ end
 			card.touch_in
 		end
 		it "changes card status to not in use" do
-			card.touch_out
+			fare_journey = 5
+			card.touch_out(fare_journey)
 			expect(card).not_to be_in_journey
 		end
 		it "deducts the fare for the journey when journey ends" do
+			fare_journey = 5
 			expect{card.touch_out(fare_journey)}.to change{card.balance}.from(card.balance).to (card.balance - fare_journey)
 		end
 	end
