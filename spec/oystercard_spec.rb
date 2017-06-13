@@ -2,15 +2,26 @@ require './lib/oystercard.rb'
 describe Oystercard do
 
 	let(:card) {described_class.new}
-	let(:station) { double("Station") }
+	let(:entry_station) { double("entry_station") }
+	let(:exit_station) { double("exit_station") }
 
 	before do
-		allow(station).to receive(:name).and_return("Bank")
+		allow(entry_station).to receive(:name).and_return("Bank")
+		allow(exit_station).to receive(:name).and_return("Mile End")
 	end
 
-	it "expects the card to have a balance of 0 when initialized" do
-		expect(card.balance).to eq(0)
+	describe "#initialize" do
+
+		it "expects the card to have a balance of 0 when initialized" do
+			expect(card.balance).to eq(0)
+		end
+
+		it "sets journey history as empty by default" do
+			expect(card.journey_history).to be_empty
+		end
+
 	end
+
 
 	describe "#top_up" do
 		it "increases the card balance by a specified amount" do
@@ -34,15 +45,16 @@ describe Oystercard do
 
 	describe "#touch_in" do
 		context "Where there is greater than £1 credit on card" do
-		it "changes card status to in use when touched in" do
+		it "lets user touch in" do
 			card.top_up(10)
-			expect(card.touch_in(station)).to eq(true)
+			card.touch_in(entry_station)
+			expect(card.entry_station).to eq "Bank"
 		end
 	end
 		context "when card has less than £1 credit" do
 			it "raises an error" do
 				card.deduct(10)
-			expect{card.touch_in(station)}.to raise_error("Not enough credit - please top up.")
+			expect{card.touch_in(entry_station)}.to raise_error("Not enough credit - please top up.")
 		end
 	end
 
@@ -50,19 +62,19 @@ describe Oystercard do
 			card.top_up(10)
 		end
 
-	  it "passes a message \'name\' to a station object" do
-			expect(station).to receive(:name)
-			card.touch_in(station)
+	  it "passes a message \'name\' to a entry_station object" do
+			expect(entry_station).to receive(:name)
+			card.touch_in(entry_station)
 		end
 
-		it "returns the station name when \'name\' message is called" do
-			expect(station).to receive(:name).and_return("Bank")
-			card.touch_in(station)
+		it "returns the entry_station name when \'name\' message is called" do
+			expect(entry_station).to receive(:name).and_return("Bank")
+			card.touch_in(entry_station)
 		end
 
-		it "assigns the station name to entry station instance variable" do
-			expect{card.touch_in(station)}.to change{card.entry_station}.from(nil).to ("Bank")
-			card.touch_in(station)
+		it "assigns the entry_station name to entry entry_station instance variable" do
+			expect{card.touch_in(entry_station)}.to change{card.entry_station}.from(nil).to ("Bank")
+			card.touch_in(entry_station)
 		end
 
 end
@@ -70,7 +82,7 @@ end
 	describe "#in_journey?" do
 		it "tells whether a card is in use" do
 			card.top_up(10)
-			card.touch_in(station)
+			card.touch_in(entry_station)
 			expect(card.in_journey?).to eq(true)
 		end
 	end
@@ -78,16 +90,33 @@ end
 	describe "#touch_out" do
 		before do
 			card.top_up(10)
-			card.touch_in(station)
+			card.touch_in(entry_station)
 		end
 		it "changes card status to not in use" do
 			fare_journey = 5
-			card.touch_out(fare_journey)
+			card.touch_out(fare_journey, exit_station)
 			expect(card).not_to be_in_journey
 		end
 		it "deducts the fare for the journey when journey ends" do
 			fare_journey = 5
-			expect{card.touch_out(fare_journey)}.to change{card.balance}.from(card.balance).to (card.balance - fare_journey)
+			expect{card.touch_out(fare_journey, exit_station)}.to change{card.balance}.from(card.balance).to (card.balance - fare_journey)
+		end
+
+		it "records the exit station's name" do
+			fare_journey = 5
+			expect{card.touch_out(fare_journey, exit_station)}.to change{card.exit_station}.from(nil).to (exit_station.name)
+		end
+
+		it "creates a record of the completed journey" do
+			 fare_journey = 5
+			 card.touch_out(fare_journey, exit_station)
+			 expect(card.journey).to eq({entry_station: "Bank", exit_station: "Mile End"})
+		end
+
+
+		it "wipes the name of entry station" do
+			fare_journey = 5
+			expect{card.touch_out(fare_journey, exit_station)}.to change{card.entry_station}.from(card.entry_station).to (nil)
 		end
 	end
 end

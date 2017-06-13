@@ -2,12 +2,14 @@ class Oystercard
 
 	CARD_LIMIT = 90
 
-	attr_accessor :balance, :in_use, :entry_station
+	attr_accessor :balance, :entry_station, :exit_station, :journey, :journey_history
 
-	def initialize(balance = 0, in_use = false)
+	def initialize(balance = 0)
 		@balance = balance
-		@in_use = in_use
 		@entry_station = nil
+		@exit_station = nil
+		@journey = {}
+		@journey_history = []
 	end
 
 	def top_up(amount)
@@ -20,17 +22,30 @@ class Oystercard
 	end
 
 	def touch_in(station)
+		@journey.clear
 		fail "Not enough credit - please top up." unless balance > 1
 		@entry_station = station.name
-		self.in_use = true
 	end
 
 	def in_journey?
-		in_use
+		@entry_station != nil
 	end
 
-	def touch_out(fare_journey)
-		self.in_use = false
+	def create_journey(exit_station)
+		@journey = {entry_station: entry_station, exit_station: exit_station.name }
+	end
+
+	def store_journey
+		@journey_history << @journey
+	end
+
+	def touch_out(fare_journey, exit_station)
+    create_journey(exit_station)
+		store_journey
+		@exit_station = exit_station.name
+		@entry_station = nil
 		deduct(fare_journey)
 	end
 end
+
+# Unwiped exit station
