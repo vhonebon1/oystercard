@@ -5,7 +5,7 @@ describe Oystercard do
 	let(:station) { double("Station") }
 
 	before do
-		allow(station).to receive(:name)
+		allow(station).to receive(:name).and_return("Bank")
 	end
 
 	it "expects the card to have a balance of 0 when initialized" do
@@ -52,6 +52,16 @@ describe Oystercard do
 
 	  it "passes a message \'name\' to a station object" do
 			expect(station).to receive(:name)
+			card.touch_in(station)
+		end
+
+		it "returns the station name when \'name\' message is called" do
+			expect(station).to receive(:name).and_return("Bank")
+			card.touch_in(station)
+		end
+
+		it "assigns the station name to entry station instance variable" do
+			expect{card.touch_in(station)}.to change{card.entry_station}.from(nil).to ("Bank")
 			card.touch_in(station)
 		end
 
