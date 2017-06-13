@@ -4,15 +4,15 @@ describe Oystercard do
 	let(:card) {described_class.new}
 
 	it "expects the card to have a balance of 0 when initialized" do
-		expect(card.balance).to eq 0
+		expect(card.balance).to eq(0)
 	end
 
 	describe "#top_up" do
 		it "increases the card balance by a specified amount" do
 			card.top_up(5)
-			expect(card.balance).to eq 5
+			expect(card.balance).to eq(5)
 		end
-		context "If top up makes balance exceed limit of £90"
+		context "If top up makes balance exceed limit of #{Oystercard::CARD_LIMIT}"
 		it "raises an error" do
 			card.top_up(Oystercard::CARD_LIMIT)
 			expect{card.top_up(1)}.to raise_error("Can't top up above £#{Oystercard::CARD_LIMIT}")
@@ -23,7 +23,7 @@ describe Oystercard do
 		it "deducts some amount from the card balance" do
 			random_amount = rand(1..90)
 			card.top_up(random_amount)
-			expect(card.deduct(random_amount)).to eq 0
+			expect(card.deduct(random_amount)).to eq(0)
 		end
 	end
 
@@ -36,7 +36,7 @@ describe Oystercard do
 	end
 		context "when card has less than £1 credit" do
 			it "raises an error" do
-			expect{card.touch_in}.to raise_error("Not enough credit - please top up!")
+			expect{card.touch_in}.to raise_error("Not enough credit - please top up.")
 		end
 	end
 end
@@ -50,11 +50,16 @@ end
 	end
 
 	describe "#touch_out" do
-		it "changes card status to not in use" do
+		before do
 			card.top_up(10)
 			card.touch_in
+		end
+		it "changes card status to not in use" do
 			card.touch_out
 			expect(card).not_to be_in_journey
+		end
+		it "deducts the fare for the journey when journey ends" do
+			expect{card.touch_out(fare_journey)}.to change{card.balance}.from(card.balance).to (card.balance - fare_journey)
 		end
 	end
 end

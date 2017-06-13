@@ -19,12 +19,12 @@ class Oystercard
 	end
 
 	def touch_in
-		fail "Not enough credit - please top up!" unless @balance > 1
+		fail "Not enough credit - please top up." unless @balance > 1
 		@in_use = true
 	end
 
 	def in_journey?
-		@in_use == true
+		in_use
 	end
 
 	def touch_out
